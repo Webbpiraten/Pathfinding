@@ -38,8 +38,8 @@ var node = function(x, y, c, id, xi, yi){ // 0,0,white = Array[0][0]
 var main = function(){
 	this.ArrayOfNodes = [];
 	this.adjList = [];
-	this.w = 800;
-	this.h = 800;
+	this.w = 5000;
+	this.h = 5000;
 	this.step = 20; 
 	canvasElementId = "canvas1";
 	canvas = document.getElementById(canvasElementId);
@@ -96,6 +96,7 @@ window.onload = function() {
 
 main.prototype.initArrayOfNodes = function(ArrayOfNodes, wi, he, step){
 	id = 0;
+	//console.log(he);
 	for(y=0; y<(he/step); y++){ // [x][y](cordX,cordY,color)
 		ArrayOfNodes[y] = [];
 		for(x=0; x<(wi/step); x++){
@@ -105,6 +106,7 @@ main.prototype.initArrayOfNodes = function(ArrayOfNodes, wi, he, step){
 			id++;
 		};
 	};
+	//console.log(ArrayOfNodes);
 };
 
 main.prototype.drawGrid = function(ctx, w, h, step) {
@@ -143,8 +145,13 @@ main.prototype.showCurrent = function(ctx, cordx, cordy){
 	ctx.fillStyle = "black"
 };
 
-main.prototype.getGrid = function(cordx, cordy){
-	if( ((cordx < 0) || (cordy < 0) || (cordx > 39) || (cordy > 39)) ){
+main.prototype.getGrid = function(cordx, cordy, w, h){
+	/*console.log(cordx);
+	console.log(cordy);
+	console.log(w);
+	console.log(h);*/
+	// w = 800 -> w = 39
+	if( ((cordx < 0) || (cordy < 0) || (cordx > main1.ArrayOfNodes.length-1) || (cordy > main1.ArrayOfNodes.length-1)) ){ // 39, w, h,
 		return false;
 	} else {
 	//if(typeof ArrayOfNodes[cordy][cordx] !== 'undefined'){
@@ -193,14 +200,14 @@ main.prototype.initAdjList = function(ArrayOfNodes){ // Check a square around th
 */
 
 main.prototype.checkNeighbours = function(cordx, cordy) {
-	if(main1.getGrid(cordx, cordy).color == "green"){ // Check for grey aswell, since they have already been visited?
+	if(main1.getGrid(cordx, cordy, main1.w, main1.h).color == "green"){ // Check for grey aswell, since they have already been visited?
 		return false;
 	}
 	//console.log(cordx);
 	//console.log(cordy);
 	var neighbour = []
 	// Top-left
-	if(main1.getGrid(cordx-1, cordy-1) != false){
+	if(main1.getGrid(cordx-1, cordy-1, main1.w, main1.h) != false){
 		//return getGrid(cordx-1, cordy-1).color;
 		
 		//neighbour.push(main1.getGrid(cordx-1, cordy-1)); // Comment out to check diagonally!
@@ -209,13 +216,13 @@ main.prototype.checkNeighbours = function(cordx, cordy) {
 		//console.log("TOP-LEFT");
 	}
 	// Top
-	if(main1.getGrid(cordx, cordy-1) != false){
+	if(main1.getGrid(cordx, cordy-1, main1.w, main1.h) != false){
 		//return getGrid(cordx, cordy-1).color;
-		neighbour.push(main1.getGrid(cordx, cordy-1));
+		neighbour.push(main1.getGrid(cordx, cordy-1, main1.w, main1.h));
 		//console.log("TOP");
 	}
 	// Top-right
-	if(main1.getGrid(cordx+1, cordy-1) != false){
+	if(main1.getGrid(cordx+1, cordy-1, main1.w, main1.h) != false){
 		//return getGrid(cordx+1, cordy-1).color;
 		
 		//neighbour.push(main1.getGrid(cordx+1, cordy-1)); // Comment out to check diagonally!
@@ -223,19 +230,19 @@ main.prototype.checkNeighbours = function(cordx, cordy) {
 		//console.log("TOP-RIGHT");
 	}
 	// Left
-	if(main1.getGrid(cordx-1, cordy) != false){
+	if(main1.getGrid(cordx-1, cordy, main1.w, main1.h) != false){
 		//return getGrid(cordx-1, cordy).color;
-		neighbour.push(main1.getGrid(cordx-1, cordy));
+		neighbour.push(main1.getGrid(cordx-1, cordy, main1.w, main1.h));
 		//console.log("LEFT");
 	}
 	// Right
-	if(main1.getGrid(cordx+1, cordy) != false){
+	if(main1.getGrid(cordx+1, cordy, main1.w, main1.h) != false){
 		//return getGrid(cordx+1, cordy).color;
-		neighbour.push(main1.getGrid(cordx+1, cordy));
+		neighbour.push(main1.getGrid(cordx+1, cordy, main1.w, main1.h));
 		//console.log("RIGHT");
 	}
 	// Bottom-left
-	if(main1.getGrid(cordx-1, cordy+1) != false){
+	if(main1.getGrid(cordx-1, cordy+1, main1.w, main1.h) != false){
 		//return getGrid(cordx-1, cordy+1).color;
 		
 		//neighbour.push(main1.getGrid(cordx-1, cordy+1)); // Comment out to check diagonally!
@@ -243,13 +250,13 @@ main.prototype.checkNeighbours = function(cordx, cordy) {
 		//console.log("BOTTOM-LEFT");
 	}
 	// Bottom
-	if(main1.getGrid(cordx, cordy+1) != false){
+	if(main1.getGrid(cordx, cordy+1, main1.w, main1.h) != false){
 		//return getGrid(cordx, cordy+1).color;
-		neighbour.push(main1.getGrid(cordx, cordy+1));
+		neighbour.push(main1.getGrid(cordx, cordy+1, main1.w, main1.h));
 		//console.log("BOTTOM");
 	}
 	// Bottom-right
-	if(main1.getGrid(cordx+1, cordy+1) != false){
+	if(main1.getGrid(cordx+1, cordy+1, main1.w, main1.h) != false){
 		//return getGrid(cordx+1, cordy+1).color;
 		
 		//neighbour.push(main1.getGrid(cordx+1, cordy+1)); // Comment out to check diagonally!
@@ -268,7 +275,7 @@ main.prototype.checkNeighbours = function(cordx, cordy) {
 };
 
 main.prototype.randomPos = function(){ // Wrong? Cant get 0?
-	return [Math.floor(Math.random() * 39) + 0 , Math.floor(Math.random() * 39) + 0 ];
+	return [Math.floor(Math.random() * main1.ArrayOfNodes.length-1) + 1 , Math.floor(Math.random() * main1.ArrayOfNodes.length-1) + 1 ]; // 39
 };
 
 main.prototype.showPath = function(node){
@@ -353,7 +360,7 @@ main.prototype.init = function(){
 
 main.prototype.getNonGreen = function(){
 	var randNode = main1.randomPos();
-	while(main1.getGrid(randNode[0], randNode[1]).color === "green"){
+	while(main1.getGrid(randNode[0], randNode[1], main1.w, main1.h).color === "green"){
 		randNode = main1.randomPos();
 	}
 	return randNode;
@@ -365,7 +372,8 @@ main.prototype.generateMaze = function(){
 // Must move 2 steps!
 
 	pos = main1.randomPos();
-	start = main1.getGrid(pos[0], pos[1]);
+	start = main1.getGrid(pos[0], pos[1], main1.w, main1.h);
+
 	main1.fillGrid(main1.ctx, start.indexX, start.indexY, "white");
 	var stack = [];
 	
@@ -387,19 +395,19 @@ main.prototype.generateMaze = function(){
 
 main.prototype.searchDeadEnd = function(node){
 	var neighbour = [];
-	if((main1.getGrid(node.indexY, node.indexX-2) != false) && (main1.getGrid(node.indexY, node.indexX-2).color != "white") && (main1.getGrid(node.indexY, node.indexX-1).color != "white")){ // Top
+	if((main1.getGrid(node.indexY, node.indexX-2, main1.w, main1.h) != false) && (main1.getGrid(node.indexY, node.indexX-2, main1.w, main1.h).color != "white") && (main1.getGrid(node.indexY, node.indexX-1, main1.w, main1.h).color != "white")){ // Top
 		//neighbour.push(main1.getGrid(node.indexY, node.indexX-2));
 		neighbour.push("top");
 	}
-	if((main1.getGrid(node.indexY-2, node.indexX) != false) && (main1.getGrid(node.indexY-2, node.indexX).color != "white") && (main1.getGrid(node.indexY-1, node.indexX).color != "white")){ // Left
+	if((main1.getGrid(node.indexY-2, node.indexX, main1.w, main1.h) != false) && (main1.getGrid(node.indexY-2, node.indexX, main1.w, main1.h).color != "white") && (main1.getGrid(node.indexY-1, node.indexX, main1.w, main1.h).color != "white")){ // Left
 		//neighbour.push(main1.getGrid(node.indexY-2, node.indexX));
 		neighbour.push("left");
 	}
-	if((main1.getGrid(node.indexY+2, node.indexX) != false) && (main1.getGrid(node.indexY+2, node.indexX).color != "white") && (main1.getGrid(node.indexY+1, node.indexX).color != "white")){ // Right
+	if((main1.getGrid(node.indexY+2, node.indexX, main1.w, main1.h) != false) && (main1.getGrid(node.indexY+2, node.indexX, main1.w, main1.h).color != "white") && (main1.getGrid(node.indexY+1, node.indexX, main1.w, main1.h).color != "white")){ // Right
 		//neighbour.push(main1.getGrid(node.indexY+2, node.indexX));
 		neighbour.push("right");
 	}
-	if((main1.getGrid(node.indexY, node.indexX+2) != false) && (main1.getGrid(node.indexY, node.indexX+2).color != "white") && (main1.getGrid(node.indexY, node.indexX+1).color != "white")){ // Bottom
+	if((main1.getGrid(node.indexY, node.indexX+2, main1.w, main1.h) != false) && (main1.getGrid(node.indexY, node.indexX+2, main1.w, main1.h).color != "white") && (main1.getGrid(node.indexY, node.indexX+1, main1.w, main1.h).color != "white")){ // Bottom
 		//neighbour.push(main1.getGrid(node.indexY, node.indexX+2));
 		neighbour.push("bottom");
 	}
@@ -426,31 +434,45 @@ main.prototype.randMove = function(nodes, node){
 		case "top": // Top
 				main1.fillGrid(main1.ctx, node.indexX-1, node.indexY, "white");
 				main1.fillGrid(main1.ctx, node.indexX-2, node.indexY, "white");
-				return main1.getGrid(node.indexY, node.indexX-2);
+				return main1.getGrid(node.indexY, node.indexX-2, main1.w, main1.h);
 				
 		case "left": // Left
 				main1.fillGrid(main1.ctx, node.indexX, node.indexY-1, "white");
 				main1.fillGrid(main1.ctx, node.indexX, node.indexY-2, "white");
-				return main1.getGrid(node.indexY-2, node.indexX);
+				return main1.getGrid(node.indexY-2, node.indexX, main1.w, main1.h);
 				
 		case "right": // Right
 				main1.fillGrid(main1.ctx, node.indexX, node.indexY+1, "white");
 				main1.fillGrid(main1.ctx, node.indexX, node.indexY+2, "white");
-				return main1.getGrid(node.indexY+2, node.indexX);
+				return main1.getGrid(node.indexY+2, node.indexX, main1.w, main1.h);
 				
 		case "bottom": // Bottom
 				main1.fillGrid(main1.ctx, node.indexX+1, node.indexY, "white");
 				main1.fillGrid(main1.ctx, node.indexX+2, node.indexY, "white");
-				return main1.getGrid(node.indexY, node.indexX+2);
+				return main1.getGrid(node.indexY, node.indexX+2, main1.w, main1.h);
 	}
 };
 
 // Show steps, slow down the process! Button?
 var main1 = new main();
+
+start = new Date();
 main1.initArrayOfNodes(main1.ArrayOfNodes, main1.w, main1.h, main1.step);
+end = new Date();
+
+start1 = new Date();
 main1.generateMaze();
+stop1 = new Date();
+
 var startpos = main1.init();
-var result = main1.BFS(main1.getGrid(startpos[0],startpos[1]), main1.adjList);
+
+start2 = new Date();
+var result = main1.BFS(main1.getGrid(startpos[0],startpos[1], main1.w, main1.h), main1.adjList);
+stop2 = new Date();
+
+console.log("initArrayOfNodes: " + (end - start)/1000);
+console.log("generateMaze: " + (stop1 - start1)/1000);
+console.log("BFS: " + (stop2 - start2)/1000);
 
 main1.drawGrid(main1.ctx, main1.w, main1.h, main1.step);
 //console.log("Distance to sink: " + result.toString());
