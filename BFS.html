@@ -1,5 +1,6 @@
 <html>
 <head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.6/p5.min.js"></script>
 </head>
 <body>
 <canvas id="canvas1"> </canvas>
@@ -14,6 +15,7 @@
 		<input type="text" name="Id" value="0" size="6"> id<br>
 		<input type="text" name="Distance" value="0" size="6"> dist<br>
 </form>
+
 
 <script type="application/javascript" language="javascript">
 
@@ -38,8 +40,8 @@ var node = function(x, y, c, id, xi, yi){ // 0,0,white = Array[0][0]
 var main = function(){
 	this.ArrayOfNodes = [];
 	this.adjList = [];
-	this.w = 5000;
-	this.h = 5000;
+	this.w = 1000;
+	this.h = 1000;
 	this.step = 20; 
 	canvasElementId = "canvas1";
 	canvas = document.getElementById(canvasElementId);
@@ -96,7 +98,6 @@ window.onload = function() {
 
 main.prototype.initArrayOfNodes = function(ArrayOfNodes, wi, he, step){
 	id = 0;
-	//console.log(he);
 	for(y=0; y<(he/step); y++){ // [x][y](cordX,cordY,color)
 		ArrayOfNodes[y] = [];
 		for(x=0; x<(wi/step); x++){
@@ -106,7 +107,6 @@ main.prototype.initArrayOfNodes = function(ArrayOfNodes, wi, he, step){
 			id++;
 		};
 	};
-	//console.log(ArrayOfNodes);
 };
 
 main.prototype.drawGrid = function(ctx, w, h, step) {
@@ -146,10 +146,6 @@ main.prototype.showCurrent = function(ctx, cordx, cordy){
 };
 
 main.prototype.getGrid = function(cordx, cordy, w, h){
-	/*console.log(cordx);
-	console.log(cordy);
-	console.log(w);
-	console.log(h);*/
 	// w = 800 -> w = 39
 	if( ((cordx < 0) || (cordy < 0) || (cordx > main1.ArrayOfNodes.length-1) || (cordy > main1.ArrayOfNodes.length-1)) ){ // 39, w, h,
 		return false;
@@ -203,8 +199,6 @@ main.prototype.checkNeighbours = function(cordx, cordy) {
 	if(main1.getGrid(cordx, cordy, main1.w, main1.h).color == "green"){ // Check for grey aswell, since they have already been visited?
 		return false;
 	}
-	//console.log(cordx);
-	//console.log(cordy);
 	var neighbour = []
 	// Top-left
 	if(main1.getGrid(cordx-1, cordy-1, main1.w, main1.h) != false){
@@ -266,7 +260,6 @@ main.prototype.checkNeighbours = function(cordx, cordy) {
 	if(neighbour.length == 0){
 		return false;
 	} else {
-		//console.log(neighbour);
 		var filtered = neighbour.filter(function(element){ // New array
 		return element.color !== "green"
 		});
@@ -287,21 +280,14 @@ main.prototype.showPath = function(node){
 
 main.prototype.BFS = function(startPos, adjlist){
 	var sinkfound = 0;
-	/*var startItem = adjlist.filter(function(elem){
-		return elem.id === startPos.id;
-	});*/
 	var startItem = [startPos]; // ENQUEUE(Q,s)
-	while(true){ // true sinkfound !== 1302
-		//console.log(startItem);
+	//var timer;
+	while(sinkfound != 1){ // true
+		//timer = setTimeout(main1.BFS, 1000);
 		var nodeInUse = startItem.shift(); // u = DEQUEUE(Q), remove from front
 		main1.showCurrent(main1.ctx, nodeInUse.indexX, nodeInUse.indexY);
-		//console.log(nodeInUse);
-
-		/*if(nodeInUse.color === "blue"){
-			return;
-		}*/
 		nodeNeighbour = main1.checkNeighbours(nodeInUse.indexY, nodeInUse.indexX);
-		//console.log(nodeNeighbour);
+
 		// for each v in G.Adj[u]
 		for(i=0; i<nodeNeighbour.length;i++){
 			var n = nodeNeighbour[i];
@@ -314,45 +300,27 @@ main.prototype.BFS = function(startPos, adjlist){
 				if(n.color === "blue"){
 					console.log("Blue found!");
 					main1.showPath(nodeInUse);
+					//clearTimeout(timer);
+					sinkfound = 1;
 					return nodeInUse.distance+1;
 				}
 			}
 		}
-		//console.log(nodeInUse);
 		if(nodeInUse.color !== "red"){
 			main1.fillGrid(main1.ctx, nodeInUse.indexX, nodeInUse.indexY, "orange");
 		} else {
 			main1.fillGrid(main1.ctx, nodeInUse.indexX, nodeInUse.indexY, "red");
 		}
-		//sinkfound++;
 	}
 };
 
 main.prototype.init = function(){
-	// Barrier
-	/*
-	for(i = 0; i < 40; i++){
-		if(i == 19){
-			continue
-		}
-		main1.fillGrid(main1.ctx, i, i, "green");
-	};
-	for(i = 0; i < 39; i++){
-		if(i == 19){
-			continue
-		}
-		main1.fillGrid(main1.ctx, i, i+1, "green");
-	};
-	*/
-
 	var start = main1.getNonGreen();
 	var end = main1.getNonGreen();
-
 	while(start[0] === end[0] || start[1] === end[1]){
 		start = main1.getNonGreen();
 		end = main1.getNonGreen();
 	}
-	
 	main1.fillGrid(main1.ctx, start[1], start[0], "red"); // Source , (y, x)
 	main1.fillGrid(main1.ctx, end[1], end[0], "blue"); // Sink
 	return start;
@@ -370,10 +338,8 @@ main.prototype.generateMaze = function(){
 // Depth-first, make all node white (all begin as green?)
 // Move Up, Down, Left or Right (no diagonally yet)
 // Must move 2 steps!
-
 	pos = main1.randomPos();
 	start = main1.getGrid(pos[0], pos[1], main1.w, main1.h);
-
 	main1.fillGrid(main1.ctx, start.indexX, start.indexY, "white");
 	var stack = [];
 	
@@ -411,16 +377,9 @@ main.prototype.searchDeadEnd = function(node){
 		//neighbour.push(main1.getGrid(node.indexY, node.indexX+2));
 		neighbour.push("bottom");
 	}
-	
 	if(neighbour.length == 0){
 		return false;
-	} else { /*
-		var filtered = neighbour.filter(function(element){
-		return element.color !== "white"
-		});
-		console.log(filtered);
-		return filtered;
-		*/
+	} else {
 		return neighbour; // true
 	}
 }
@@ -453,7 +412,7 @@ main.prototype.randMove = function(nodes, node){
 	}
 };
 
-// Show steps, slow down the process! Button?
+// Show steps, slow down the process? Button?
 var main1 = new main();
 
 start = new Date();
