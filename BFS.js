@@ -6,6 +6,7 @@ var myheight;
 var startpos;
 var result;
 var startup;
+//var lastNode = [];
 
 // p5.js code starts LAST. [<Head>, <Body>, p5.js]
 function setup(){ // Runs once
@@ -16,19 +17,22 @@ function setup(){ // Runs once
 	frameRate(61);
 	noLoop(); // draw() runs once. Loop() restarts it.
 	startup = true;
+	
 	main1 = new main();
+	main1.drawGrid(main1.w, main1.h, main1.step);
+	main1.initArrayOfNodes(main1.ArrayOfNodes, main1.w, main1.h, main1.step);
+	main1.generateMaze();
+	startpos = main1.init();
+	main1.BFS(main1.getGrid(startpos[0],startpos[1], main1.w, main1.h), main1.adjList);
 }
 
 function draw(){ // Called after setup is done. Loops until NoLoop is called.
 	
 	if(startup === true){
 		startup = false;
-		main1.drawGrid(main1.w, main1.h, main1.step);
-		main1.initArrayOfNodes(main1.ArrayOfNodes, main1.w, main1.h, main1.step);
-		main1.generateMaze();
-		startpos = main1.init();
-		result = main1.BFS(main1.getGrid(startpos[0],startpos[1], main1.w, main1.h), main1.adjList);
-		console.log("Distance to sink: " + result.toString());
+		//result = main1.BFS(main1.getGrid(startpos[0],startpos[1], main1.w, main1.h), main1.adjList);
+		//main1.BFS(, main1.adjList);
+		//console.log("Distance to sink: " + result.toString());
 	}
 }
 
@@ -38,6 +42,7 @@ var main = function(){
 	this.w = mywidth;
 	this.h = myheight;
 	this.step = 20;
+	this.lastNode = [];
 };
 
 var node = function(x, y, c, id, xi, yi){ // 0,0,white = Array[0][0]
@@ -49,6 +54,22 @@ var node = function(x, y, c, id, xi, yi){ // 0,0,white = Array[0][0]
 	this.indexX = xi;
 	this.predec = 0;
 	this.distance = 0; // From the source node
+	
+	this.show = function(colr){
+		rect(this.cordX, this.cordY, 19, 19);
+	};
+};
+
+main.prototype.init = function(){
+	var start = main1.getNonGreen();
+	var end = main1.getNonGreen();
+	while(start[0] === end[0] || start[1] === end[1]){
+		start = main1.getNonGreen();
+		end = main1.getNonGreen();
+	}
+	main1.fillGrid(start[1], start[0], 'red'); // Source , (y, x), c = red
+	main1.fillGrid(end[1], end[0], 'blue'); // Sink, c = blue
+	return start;
 };
 
 main.prototype.initArrayOfNodes = function(ArrayOfNodes, wi, he, step){
@@ -198,12 +219,13 @@ main.prototype.showPath = function(node){
 	}
 }
 
-main.prototype.BFS = function(startPos, adjlist){
+main.prototype.BFS = function(startPosi, adjlist){
 	var sinkfound = 0;
-	var startItem = [startPos]; // ENQUEUE(Q,s)
-	//var timer;
-	while(sinkfound != 1){ // true
-		//timer = setTimeout(main1.BFS, 1000);
+	var startItem = [startPosi]; // ENQUEUE(Q,s)
+	
+	
+	//while(sinkfound != 1){ // Without this, it takes one step.
+
 		var nodeInUse = startItem.shift(); // u = DEQUEUE(Q), remove from front
 		//main1.showCurrent(main1.ctx, nodeInUse.indexX, nodeInUse.indexY);
 		nodeNeighbour = main1.checkNeighbours(nodeInUse.indexY, nodeInUse.indexX);
@@ -212,7 +234,7 @@ main.prototype.BFS = function(startPos, adjlist){
 		for(i=0; i<nodeNeighbour.length;i++){
 			var n = nodeNeighbour[i];
 			if(n.color === "white"){
-				main1.fillGrid(n.indexX, n.indexY, 'gray'); // mycolor = gray
+				main1.fillGrid(n.indexX, n.indexY, 'gray');
 				n.predec = nodeInUse.id;
 				n.distance = nodeInUse.distance + 1;
 				startItem.push(n);
@@ -220,30 +242,20 @@ main.prototype.BFS = function(startPos, adjlist){
 				if(n.color === "blue"){
 					console.log("Blue found!");
 					main1.showPath(nodeInUse);
-					//clearTimeout(timer);
 					sinkfound = 1;
 					return nodeInUse.distance+1;
 				}
 			}
 		}
+		
 		if(nodeInUse.color !== "red"){
 			main1.fillGrid(nodeInUse.indexX, nodeInUse.indexY, 'orange');
 		} else {
 			main1.fillGrid(nodeInUse.indexX, nodeInUse.indexY, 'red');
 		}
-	}
-};
-
-main.prototype.init = function(){
-	var start = main1.getNonGreen();
-	var end = main1.getNonGreen();
-	while(start[0] === end[0] || start[1] === end[1]){
-		start = main1.getNonGreen();
-		end = main1.getNonGreen();
-	}
-	main1.fillGrid(start[1], start[0], 'red'); // Source , (y, x), c = red
-	main1.fillGrid(end[1], end[0], 'blue'); // Sink, c = blue
-	return start;
+		console.log(startItem);
+		//main1.lastNode.push(); // Remember all the grey ones?
+	//}
 };
 
 main.prototype.getNonGreen = function(){
@@ -272,7 +284,7 @@ main.prototype.generateMaze = function(){
 			if(stack.length != 0){
 				start = stack.pop();
 			} else {
-				console.log("Done!");
+				console.log("Maze done!");
 				return;
 			}
 		}
