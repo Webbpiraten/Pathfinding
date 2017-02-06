@@ -7,18 +7,24 @@ var startpos;
 var result;
 var startup;
 var startItem;
+var stop;
+var framerate;
+var running;
 //var lastNode = [];
 
 // p5.js code starts LAST. [<Head>, <Body>, p5.js]
 function setup(){ // Runs once
-	mywidth = 500;
-	myheight = 500;
+	mywidth = 2000;
+	myheight = 2000;
 	createCanvas(mywidth, myheight);
 	background(255,255,255);
-	frameRate(61);
+	framerate = 10;
+	frameRate(framerate);
 	noLoop(); // draw() runs once. Loop() restarts it.
-	startup = true;
+	startup = false;
 	
+	running = false;
+	stop = false;
 	main1 = new main();
 	main1.drawGrid(main1.w, main1.h, main1.step);
 	main1.initArrayOfNodes(main1.ArrayOfNodes, main1.w, main1.h, main1.step);
@@ -29,17 +35,39 @@ function setup(){ // Runs once
 }
 
 function draw(){ // Called after setup is done. Loops until NoLoop is called.
-	if(startup === true){
+	if(stop === false){
 		//result = main1.BFS(main1.getGrid(startpos[0],startpos[1], main1.w, main1.h), main1.adjList);
 		main1.BFS(startItem, main1.adjList);
 		//console.log("Distance to sink: " + result.toString());
 	}
-
+	//main1.BFS(startItem, main1.adjList);
 }
 
 function keyPressed() {
-  if (keyCode === LEFT_ARROW) {
-	redraw();
+	if (keyCode === LEFT_ARROW) {
+		redraw();
+	}
+	if (keyCode === UP_ARROW) {
+		framerate++;
+		frameRate(framerate);
+	}
+	if (keyCode === RIGHT_ARROW) {
+		if(running === false){
+			//startup = true;
+			running = true;
+			loop();
+			redraw();
+		} else {
+			running = false;
+			noLoop();
+		}
+		
+	}
+	if (keyCode === DOWN_ARROW) {
+		if(framerate > 0){
+			framerate--;
+			frameRate(framerate);
+		}
 	}
 }
 
@@ -252,6 +280,8 @@ main.prototype.BFS = function(startPosi, adjlist){
 					main1.showPath(nodeInUse);
 					sinkfound = 1;
 					startup = false;
+					noLoop();
+					stop = true;
 					return nodeInUse.distance+1;
 				}
 			}
