@@ -40,7 +40,6 @@ function draw(){ // Called after setup is done. Loops until NoLoop is called.
 		main1.BFS(startItem, main1.adjList);
 		//console.log("Distance to sink: " + result.toString());
 	}
-	//main1.BFS(startItem, main1.adjList);
 }
 
 function keyPressed() {
@@ -48,12 +47,12 @@ function keyPressed() {
 		redraw();
 	}
 	if (keyCode === UP_ARROW) {
-		framerate++;
+		framerate = framerate + 10;
 		frameRate(framerate);
+		console.log(framerate);
 	}
 	if (keyCode === RIGHT_ARROW) {
 		if(running === false){
-			//startup = true;
 			running = true;
 			loop();
 			redraw();
@@ -61,12 +60,12 @@ function keyPressed() {
 			running = false;
 			noLoop();
 		}
-		
 	}
 	if (keyCode === DOWN_ARROW) {
 		if(framerate > 0){
-			framerate--;
+			framerate = framerate - 10;
 			frameRate(framerate);
+			console.log(framerate);
 		}
 	}
 }
@@ -78,6 +77,7 @@ var main = function(){
 	this.h = myheight;
 	this.step = 20;
 	this.lastNode = [];
+	this.diagonally = false;
 };
 
 var node = function(x, y, c, id, xi, yi){ // 0,0,white = Array[0][0]
@@ -176,28 +176,39 @@ main.prototype.checkNeighbours = function(cordx, cordy) {
 		return false;
 	}
 	var neighbour = [];
-	// Top-left
-	if(main1.getGrid(cordx-1, cordy-1, main1.w, main1.h) != false){
-		//return getGrid(cordx-1, cordy-1).color;
-		
-		//neighbour.push(main1.getGrid(cordx-1, cordy-1)); // Comment out to check diagonally!
-		
-		//console.log(main1.getGrid(cordx-1, cordy-1))
-		//console.log("TOP-LEFT");
+	
+	if(main1.diagonally === true){
+		// Top-left
+		if(main1.getGrid(cordx-1, cordy-1, main1.w, main1.h) != false){
+			//return getGrid(cordx-1, cordy-1).color;
+			neighbour.push(main1.getGrid(cordx-1, cordy-1)); // Comment out to check diagonally!
+			//console.log(main1.getGrid(cordx-1, cordy-1))
+			//console.log("TOP-LEFT");
+		}
+		// Top-right
+		if(main1.getGrid(cordx+1, cordy-1, main1.w, main1.h) != false){
+			//return getGrid(cordx+1, cordy-1).color;
+			neighbour.push(main1.getGrid(cordx+1, cordy-1)); // Comment out to check diagonally!
+			//console.log("TOP-RIGHT");
+		}
+		// Bottom-left
+		if(main1.getGrid(cordx-1, cordy+1, main1.w, main1.h) != false){
+			//return getGrid(cordx-1, cordy+1).color;
+			neighbour.push(main1.getGrid(cordx-1, cordy+1)); // Comment out to check diagonally!
+			//console.log("BOTTOM-LEFT");
+		}
+		// Bottom-right
+		if(main1.getGrid(cordx+1, cordy+1, main1.w, main1.h) != false){
+			//return getGrid(cordx+1, cordy+1).color;
+			neighbour.push(main1.getGrid(cordx+1, cordy+1)); // Comment out to check diagonally!
+			//console.log("BOTTOM-RIGHT");
+		}
 	}
 	// Top
 	if(main1.getGrid(cordx, cordy-1, main1.w, main1.h) != false){
 		//return getGrid(cordx, cordy-1).color;
 		neighbour.push(main1.getGrid(cordx, cordy-1, main1.w, main1.h));
 		//console.log("TOP");
-	}
-	// Top-right
-	if(main1.getGrid(cordx+1, cordy-1, main1.w, main1.h) != false){
-		//return getGrid(cordx+1, cordy-1).color;
-		
-		//neighbour.push(main1.getGrid(cordx+1, cordy-1)); // Comment out to check diagonally!
-		
-		//console.log("TOP-RIGHT");
 	}
 	// Left
 	if(main1.getGrid(cordx-1, cordy, main1.w, main1.h) != false){
@@ -211,27 +222,11 @@ main.prototype.checkNeighbours = function(cordx, cordy) {
 		neighbour.push(main1.getGrid(cordx+1, cordy, main1.w, main1.h));
 		//console.log("RIGHT");
 	}
-	// Bottom-left
-	if(main1.getGrid(cordx-1, cordy+1, main1.w, main1.h) != false){
-		//return getGrid(cordx-1, cordy+1).color;
-		
-		//neighbour.push(main1.getGrid(cordx-1, cordy+1)); // Comment out to check diagonally!
-		
-		//console.log("BOTTOM-LEFT");
-	}
 	// Bottom
 	if(main1.getGrid(cordx, cordy+1, main1.w, main1.h) != false){
 		//return getGrid(cordx, cordy+1).color;
 		neighbour.push(main1.getGrid(cordx, cordy+1, main1.w, main1.h));
 		//console.log("BOTTOM");
-	}
-	// Bottom-right
-	if(main1.getGrid(cordx+1, cordy+1, main1.w, main1.h) != false){
-		//return getGrid(cordx+1, cordy+1).color;
-		
-		//neighbour.push(main1.getGrid(cordx+1, cordy+1)); // Comment out to check diagonally!
-		
-		//console.log("BOTTOM-RIGHT");
 	}
 	if(neighbour.length == 0){
 		return false;
@@ -249,7 +244,7 @@ main.prototype.randomPos = function(){ // Wrong? Cant get 0?
 
 main.prototype.showPath = function(node){
 	while(node.color !== "red"){
-		main1.fillGrid(node.indexX, node.indexY, 'purple'); // mycolor = purple
+		main1.fillGrid(node.indexX, node.indexY, 'purple');
 		node = main1.getGridById(node.predec);
 	}
 }
@@ -257,44 +252,35 @@ main.prototype.showPath = function(node){
 main.prototype.BFS = function(startPosi, adjlist){
 	var sinkfound = 0;
 	//var startItem = [startPosi]; // ENQUEUE(Q,s)
-	
-	
-	
-	//while(sinkfound != 1){ // Without this, it takes one step.
+	var nodeInUse = startItem.shift(); // u = DEQUEUE(Q), remove from front
+	//main1.showCurrent(main1.ctx, nodeInUse.indexX, nodeInUse.indexY);
+	nodeNeighbour = main1.checkNeighbours(nodeInUse.indexY, nodeInUse.indexX);
 
-		var nodeInUse = startItem.shift(); // u = DEQUEUE(Q), remove from front
-		//main1.showCurrent(main1.ctx, nodeInUse.indexX, nodeInUse.indexY);
-		nodeNeighbour = main1.checkNeighbours(nodeInUse.indexY, nodeInUse.indexX);
-
-		// for each v in G.Adj[u]
-		for(i=0; i<nodeNeighbour.length;i++){
-			var n = nodeNeighbour[i];
-			if(n.color === "white"){
-				main1.fillGrid(n.indexX, n.indexY, 'gray');
-				n.predec = nodeInUse.id;
-				n.distance = nodeInUse.distance + 1;
-				startItem.push(n);
-			} else {
-				if(n.color === "blue"){
-					console.log("Blue found!");
-					main1.showPath(nodeInUse);
-					sinkfound = 1;
-					startup = false;
-					noLoop();
-					stop = true;
-					return nodeInUse.distance+1;
-				}
+	// for each v in G.Adj[u]
+	for(i=0; i<nodeNeighbour.length;i++){
+		var n = nodeNeighbour[i];
+		if(n.color === "white"){
+			main1.fillGrid(n.indexX, n.indexY, 'gray');
+			n.predec = nodeInUse.id;
+			n.distance = nodeInUse.distance + 1;
+			startItem.push(n);
+		} else {
+			if(n.color === "blue"){
+				console.log("Blue found!");
+				main1.showPath(nodeInUse);
+				sinkfound = 1;
+				startup = false;
+				noLoop();
+				stop = true;
+				return nodeInUse.distance+1;
 			}
 		}
-		
-		if(nodeInUse.color !== "red"){
-			main1.fillGrid(nodeInUse.indexX, nodeInUse.indexY, 'orange');
-		} else {
-			main1.fillGrid(nodeInUse.indexX, nodeInUse.indexY, 'red');
-		}
-		//console.log(startItem);
-		//main1.lastNode.push(); // Remember all the grey ones?
-	//}
+	}
+	if(nodeInUse.color !== "red"){
+		main1.fillGrid(nodeInUse.indexX, nodeInUse.indexY, 'orange');
+	} else {
+		main1.fillGrid(nodeInUse.indexX, nodeInUse.indexY, 'red');
+	}
 };
 
 main.prototype.getNonGreen = function(){
@@ -359,26 +345,25 @@ main.prototype.randMove = function(nodes, node){
 	// Check array (possible moves), select one randomly, (choose dep. on array size)
 	// Nodes is an array of possible moves
 	direction = nodes[(Math.floor(Math.random() * nodes.length) + 0)];
-	//console.log("randmove");
 	switch (direction) { // Math.floor(Math.random() * 4) + 0
 		case "top": // Top
-				main1.fillGrid(node.indexX-1, node.indexY, "white"); // mycolor = "white"
-				main1.fillGrid(node.indexX-2, node.indexY, "white"); // mycolor = white
+				main1.fillGrid(node.indexX-1, node.indexY, "white");
+				main1.fillGrid(node.indexX-2, node.indexY, "white");
 				return main1.getGrid(node.indexY, node.indexX-2, main1.w, main1.h);
 				
 		case "left": // Left
-				main1.fillGrid(node.indexX, node.indexY-1, "white"); // mycolor = white
-				main1.fillGrid(node.indexX, node.indexY-2, "white"); // mycolor = white
+				main1.fillGrid(node.indexX, node.indexY-1, "white");
+				main1.fillGrid(node.indexX, node.indexY-2, "white");
 				return main1.getGrid(node.indexY-2, node.indexX, main1.w, main1.h);
 				
 		case "right": // Right
-				main1.fillGrid(node.indexX, node.indexY+1, "white"); // mycolor = white
-				main1.fillGrid(node.indexX, node.indexY+2, "white"); // mycolor = white
+				main1.fillGrid(node.indexX, node.indexY+1, "white");
+				main1.fillGrid(node.indexX, node.indexY+2, "white");
 				return main1.getGrid(node.indexY+2, node.indexX, main1.w, main1.h);
 				
 		case "bottom": // Bottom
-				main1.fillGrid(node.indexX+1, node.indexY, "white"); // mycolor = white
-				main1.fillGrid(node.indexX+2, node.indexY, "white"); // mycolor = white
+				main1.fillGrid(node.indexX+1, node.indexY, "white");
+				main1.fillGrid(node.indexX+2, node.indexY, "white");
 				return main1.getGrid(node.indexY, node.indexX+2, main1.w, main1.h);
 	}
 };
