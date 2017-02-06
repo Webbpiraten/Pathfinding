@@ -6,12 +6,13 @@ var myheight;
 var startpos;
 var result;
 var startup;
+var startItem;
 //var lastNode = [];
 
 // p5.js code starts LAST. [<Head>, <Body>, p5.js]
 function setup(){ // Runs once
-	mywidth = 1000;
-	myheight = 1000;
+	mywidth = 500;
+	myheight = 500;
 	createCanvas(mywidth, myheight);
 	background(255,255,255);
 	frameRate(61);
@@ -23,16 +24,22 @@ function setup(){ // Runs once
 	main1.initArrayOfNodes(main1.ArrayOfNodes, main1.w, main1.h, main1.step);
 	main1.generateMaze();
 	startpos = main1.init();
-	main1.BFS(main1.getGrid(startpos[0],startpos[1], main1.w, main1.h), main1.adjList);
+	startItem = [main1.getGrid(startpos[0],startpos[1], main1.w, main1.h)];
+	main1.BFS(startItem, main1.adjList);
 }
 
 function draw(){ // Called after setup is done. Loops until NoLoop is called.
-	
 	if(startup === true){
-		startup = false;
 		//result = main1.BFS(main1.getGrid(startpos[0],startpos[1], main1.w, main1.h), main1.adjList);
-		//main1.BFS(, main1.adjList);
+		main1.BFS(startItem, main1.adjList);
 		//console.log("Distance to sink: " + result.toString());
+	}
+
+}
+
+function keyPressed() {
+  if (keyCode === LEFT_ARROW) {
+	redraw();
 	}
 }
 
@@ -221,7 +228,8 @@ main.prototype.showPath = function(node){
 
 main.prototype.BFS = function(startPosi, adjlist){
 	var sinkfound = 0;
-	var startItem = [startPosi]; // ENQUEUE(Q,s)
+	//var startItem = [startPosi]; // ENQUEUE(Q,s)
+	
 	
 	
 	//while(sinkfound != 1){ // Without this, it takes one step.
@@ -243,6 +251,7 @@ main.prototype.BFS = function(startPosi, adjlist){
 					console.log("Blue found!");
 					main1.showPath(nodeInUse);
 					sinkfound = 1;
+					startup = false;
 					return nodeInUse.distance+1;
 				}
 			}
@@ -253,7 +262,7 @@ main.prototype.BFS = function(startPosi, adjlist){
 		} else {
 			main1.fillGrid(nodeInUse.indexX, nodeInUse.indexY, 'red');
 		}
-		console.log(startItem);
+		//console.log(startItem);
 		//main1.lastNode.push(); // Remember all the grey ones?
 	//}
 };
