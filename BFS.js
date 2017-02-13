@@ -10,28 +10,39 @@ var startItem;
 var stop;
 var framerate;
 var running;
+var size;
+
+var iniMaze;
+var genMaze;
+var startMaze;
+var stack;
 //var lastNode = [];
 
 // p5.js code starts LAST. [<Head>, <Body>, p5.js]
 function setup(){ // Runs once
-	mywidth = 2000;
-	myheight = 2000;
-	createCanvas(mywidth, myheight);
+	mywidth = 500;
+	myheight = 500;
+	var canvas = createCanvas(mywidth, myheight);
+	canvas.parent('sketch-holder');
+	
 	background(255,255,255);
 	framerate = 10;
 	frameRate(framerate);
 	noLoop(); // draw() runs once. Loop() restarts it.
 	startup = false;
+	genMaze = false;
+	iniMaze = true;
 	
 	running = false;
-	stop = false;
+	stop = true;
 	main1 = new main();
-	main1.drawGrid(main1.w, main1.h, main1.step);
-	main1.initArrayOfNodes(main1.ArrayOfNodes, main1.w, main1.h, main1.step);
-	main1.generateMaze();
-	startpos = main1.init();
-	startItem = [main1.getGrid(startpos[0],startpos[1], main1.w, main1.h)];
-	main1.BFS(startItem, main1.adjList);
+	
+	//main1.drawGrid(main1.w, main1.h, main1.step);
+	//main1.initArrayOfNodes(main1.ArrayOfNodes, main1.w, main1.h, main1.step);
+	//main1.generateMaze();
+	//startpos = main1.init();
+	//startItem = [main1.getGrid(startpos[0],startpos[1], main1.w, main1.h)];
+	//main1.BFS(startItem, main1.adjList);
 }
 
 function draw(){ // Called after setup is done. Loops until NoLoop is called.
@@ -40,32 +51,37 @@ function draw(){ // Called after setup is done. Loops until NoLoop is called.
 		main1.BFS(startItem, main1.adjList);
 		//console.log("Distance to sink: " + result.toString());
 	}
+	if(genMaze === true){
+		main1.generateMaze();
+	}
 }
 
 function keyPressed() {
-	if (keyCode === LEFT_ARROW) {
-		redraw();
-	}
-	if (keyCode === UP_ARROW) {
-		framerate = framerate + 10;
-		frameRate(framerate);
-		console.log(framerate);
-	}
-	if (keyCode === RIGHT_ARROW) {
-		if(running === false){
-			running = true;
-			loop();
+	if(genMaze === false){
+		if (keyCode === LEFT_ARROW) {
 			redraw();
-		} else {
-			running = false;
-			noLoop();
 		}
-	}
-	if (keyCode === DOWN_ARROW) {
-		if(framerate > 0){
-			framerate = framerate - 10;
+		if (keyCode === UP_ARROW) {
+			framerate = framerate + 10;
 			frameRate(framerate);
 			console.log(framerate);
+		}
+		if (keyCode === RIGHT_ARROW) {
+			if(running === false){
+				running = true;
+				loop();
+				redraw();
+			} else {
+				running = false;
+				noLoop();
+			}
+		}
+		if (keyCode === DOWN_ARROW) {
+			if(framerate > 0){
+				framerate = framerate - 10;
+				frameRate(framerate);
+				console.log(framerate);
+			}
 		}
 	}
 }
@@ -94,6 +110,22 @@ var node = function(x, y, c, id, xi, yi){ // 0,0,white = Array[0][0]
 		rect(this.cordX, this.cordY, 19, 19);
 	};
 };
+
+main.prototype.start = function(){
+	size = document.getElementById("size").value;
+	document.getElementById("button").disabled = true;
+	document.getElementById("size").disabled = true;
+	
+	main1.w = size;
+	main1.h = size;
+	resizeCanvas(size, size);
+	main1.drawGrid(main1.w, main1.h, main1.step);
+	main1.initArrayOfNodes(main1.ArrayOfNodes, main1.w, main1.h, main1.step);
+	genMaze = true;
+	loop();
+	frameRate(60);
+	main1.generateMaze();
+}
 
 main.prototype.init = function(){
 	var start = main1.getNonGreen();
@@ -295,25 +327,37 @@ main.prototype.generateMaze = function(){
 // Depth-first, make all node white (all begin as green?)
 // Move Up, Down, Left or Right (no diagonally yet)
 // Must move 2 steps!
-	pos = main1.randomPos();
-	start = main1.getGrid(pos[0], pos[1], main1.w, main1.h);
-	main1.fillGrid(start.indexX, start.indexY, 'white'); // mycolor = white
-	var stack = [];
+
+	if(iniMaze === true){
+		pos = main1.randomPos(); // pos
+		startMaze = main1.getGrid(pos[0], pos[1], main1.w, main1.h); // start
+		main1.fillGrid(startMaze.indexX, startMaze.indexY, 'white'); // start
+		//var stack = [];
+		stack = [];
+		iniMaze = false;
+	}	
 	
-	while(true){
-		var possiblemoves = main1.searchDeadEnd(start);
+	//while(true){
+		var possiblemoves = main1.searchDeadEnd(startMaze); // start
 		if(possiblemoves != false){
-			stack.push(start);
-			start = main1.randMove(possiblemoves, start);
+			stack.push(startMaze); // start
+			startMaze = main1.randMove(possiblemoves, startMaze); // startMaze
 		} else {
 			if(stack.length != 0){
-				start = stack.pop();
+				startMaze = stack.pop(); // start
 			} else {
 				console.log("Maze done!");
+				genMaze = false;
+				noLoop();
+				frameRate(10);
+				startpos = main1.init();
+				startItem = [main1.getGrid(startpos[0],startpos[1], main1.w, main1.h)];
+				main1.BFS(startItem, main1.adjList);
+				stop = false;
 				return;
 			}
 		}
-	}
+	//}
 };
 
 main.prototype.searchDeadEnd = function(node){
