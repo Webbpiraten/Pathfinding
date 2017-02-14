@@ -1,10 +1,10 @@
 html, body {
-	height:100%;
+	#height:100%;
 	#width:100%;
 }
 
 body {
-	margin-top: 20px;
+	#margin-top: 20px;
 	display:left;
 	#justify-content:space-around;
 	#align-items:top;
