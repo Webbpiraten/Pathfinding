@@ -1,2 +1,16 @@
-#canvas-wrap { position:relative; width:800px; height:600px }
-#canvas-wrap canvas { position:absolute; top:0; left:0; z-index:0 }
+html, body {
+	#height:100%;
+	#width:100%;
+}
+
+body {
+	#margin-top: 20px;
+	display:left;
+	#justify-content:space-around;
+	#align-items:top;
+}
+
+div{
+	margin: 20px;
+	justify-content:space-around;
+}
